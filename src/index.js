@@ -1,11 +1,6 @@
 import "dotenv/config";
-import path from "path";
-import mongoose from "mongoose";
 import express from "express";
-import { DB_NAME } from "./constants.js";
 import connectDB from "./db/index.js";
-
-console.log("Current directory:", path.resolve());
 
 const app = express();
 
@@ -18,4 +13,5 @@ connectDB()
   })
   .catch((err) => {
     console.error("Failed to connect to the database:", err.message);
+    throw err;
   });
