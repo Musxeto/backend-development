@@ -2,6 +2,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 const registerUser = asyncHandler(async (req, res) => {
   //GET USER DETAILS FROM FRONT END
   //VALIDATION - NOT EMPTY
@@ -39,13 +40,24 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Avatar uis required");
   }
 
-  User.create({
+  const user = await User.create({
     fullname,
     avatar: avatar.url,
     coverImage: coverImage.url || "",
     email,
     username: username.toLowercase(),
   });
+
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken "
+  );
+  if (!createdUser) {
+    throw new ApiError(500, "Something went wrong whil registring the user");
+  }
+
+  return res
+    .status(201)
+    .json(new ApiResponse(200, createdUser, "User Registered Successfully"));
 });
 
 export { registerUser };
